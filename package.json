@@ -1,0 +1,22 @@
+{
+  "name": "nodejs_clean_architecture",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "bun build index.ts --outdir dist --target node",
+    "dev": "bun --watch index.ts"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "env-var": "^7.5.0",
+    "express": "^5.1.0"
+  }
+}
