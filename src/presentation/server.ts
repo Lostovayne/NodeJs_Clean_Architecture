@@ -18,8 +18,10 @@ export class Server {
 
   async start() {
     // Middleware can be added here if needed
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
     this.app.use(this.routes);
-    
+
     this.app.listen(this.port, () => {
       console.log("Server is running on http://localhost:" + this.port);
     });

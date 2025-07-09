@@ -4,13 +4,10 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package.json bun.lock* tsconfig.json ./
 
-# Instala curl y bash necesarios para instalar Bun
 RUN apk add --no-cache curl bash
 
-# Instala Bun
 RUN curl -fsSL https://bun.sh/install | bash && \
     mv /root/.bun/bin/bun /usr/local/bin/bun
 
@@ -26,4 +23,4 @@ RUN bun run build
 EXPOSE 3000
 
 # Start the app
-CMD ["node", "dist/index.js"]
+CMD ["bun", "dist/index.js"]
