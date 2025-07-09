@@ -1,3 +1,30 @@
 # .husky/pre-commit
-prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
+
+# Obtener archivos staged
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+
+# Formatear con Prettier
+npx prettier $STAGED_FILES --write --ignore-unknown
+
+# Lint con ESLint solo archivos staged JS/TS
+STAGED_LINT=$(echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx)$' || true)
+if [ -n "$STAGED_LINT" ]; then
+  npx eslint $STAGED_LINT
+  if [ $? -ne 0 ]; then
+    echo "\nESLint encontró errores. Corrígelos antes de commitear."
+    exit 1
+  fi
+fi
+
+# Verificar tipos TypeScript solo en archivos staged TS/TSX
+# STAGED_TS=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
+# if [ -n "$STAGED_TS" ]; then
+#   bun tsc --noEmit
+#   if [ $? -ne 0 ]; then
+#     echo "\nErrores de tipos TypeScript encontrados. Corrígelos antes de commitear."
+#     exit 1
+#   fi
+# fi
+
+# Actualizar el índice de git
 git update-index --again

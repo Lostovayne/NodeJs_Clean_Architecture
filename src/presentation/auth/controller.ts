@@ -5,12 +5,15 @@ export class AuthController {
   constructor() {}
 
   registerUser = (req: Request, res: Response) => {
-    const errorDto = RegisterUserDto.create(req.body);
+    const [error, registerUserDto] = RegisterUserDto.create(req.body);
+    if (error) {
+      return res.status(400).json({ error });
+    }
 
-    res.json("User registered successfully");
+    return res.json("User registered successfully");
   };
 
   loginUser = (req: Request, res: Response) => {
-    res.json("User logged in successfully");
+    return res.json("User logged in successfully");
   };
 }
