@@ -17,14 +17,14 @@ if [ -n "$STAGED_LINT" ]; then
 fi
 
 # Verificar tipos TypeScript solo en archivos staged TS/TSX
-# STAGED_TS=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
-# if [ -n "$STAGED_TS" ]; then
-#   bun tsc --noEmit
-#   if [ $? -ne 0 ]; then
-#     echo "\nErrores de tipos TypeScript encontrados. Corrígelos antes de commitear."
-#     exit 1
-#   fi
-# fi
+STAGED_TS=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$STAGED_TS" ]; then
+  bun tsc --noEmit
+  if [ $? -ne 0 ]; then
+    echo "\nErrores de tipos TypeScript encontrados. Corrígelos antes de commitear."
+    exit 1
+  fi
+fi
 
 # Actualizar el índice de git
 git update-index --again
