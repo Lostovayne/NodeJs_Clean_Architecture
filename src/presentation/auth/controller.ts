@@ -1,19 +1,28 @@
 import { RegisterUserDto } from "@src/domain/dtos/auth/register-user.dto";
+import type { AuthRepository } from "@src/domain/repositories/auth.repository";
 import type { Request, Response } from "express";
 
 export class AuthController {
-  constructor() {}
+  constructor(private readonly authRepository: AuthRepository) {}
 
-  registerUser = (req: Request, res: Response) => {
+  registerUser = (req: Request, res: Response): void => {
     const [error, registerUserDto] = RegisterUserDto.create(req.body);
     if (error) {
-      return res.status(400).json({ error });
+      res.status(400).json({ error });
+      return;
+    }
+    if (!registerUserDto) {
+      res.status(400).json({ error: "Invalid user data" });
+      return;
     }
 
-    return res.json("User registered successfully");
+    this.authRepository
+      .register(registerUserDto)
+      .then((user) => res.json(user))
+      .catch((error) => res.status(500).json(error));
   };
 
-  loginUser = (req: Request, res: Response) => {
-    return res.json("User logged in successfully");
+  loginUser = (req: Request, res: Response): void => {
+    res.json("User logged in successfully");
   };
 }

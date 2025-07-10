@@ -12,7 +12,7 @@ export default [
     },
     rules: {
       "no-unused-vars": "warn",
-      "no-undef": "warn",
+      // "no-undef": "warn",
       // Agrega aquí solo las reglas que realmente quieras personalizar
     },
   },
