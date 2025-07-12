@@ -1,0 +1,73 @@
+# Optimized Dockerfile for production - Target size: ~150MB
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Install only essential packages
+RUN apk add --no-cache libc6-compat curl
+
+# Install Bun (smaller installation)
+RUN curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/bun && \
+    rm -rf /root/.bun
+
+# Copy package files
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile --production && \
+    bun pm cache rm
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+
+# Install Bun and build tools
+RUN apk add --no-cache curl
+RUN curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/bun && \
+    rm -rf /root/.bun
+
+COPY package.json bun.lock* tsconfig.json ./
+RUN bun install --frozen-lockfile
+
+COPY . .
+
+# Build the application and clean up
+RUN bun run build && \
+    rm -rf src && \
+    rm -rf node_modules && \
+    bun install --frozen-lockfile --production && \
+    bun pm cache rm
+
+# Production image, copy all the files and run bun
+FROM base AS runner
+WORKDIR /app
+
+# Create a non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
+
+# Install only runtime dependencies
+RUN apk add --no-cache curl && \
+    curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/bun && \
+    rm -rf /root/.bun
+
+# Copy the build output and production node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Health check (lightweight)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Start the application
+CMD ["bun", "dist/index.js"]

@@ -1,0 +1,80 @@
+# name: Build and Deploy to DigitalOcean
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# env:
+#   REGISTRY: registry.digitalocean.com/your-registry-name
+#   IMAGE_NAME: nodejs-clean-architecture
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+
+#     - name: Install doctl
+#       uses: digitalocean/action-doctl@v2
+#       with:
+#         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+#     - name: Log in to DigitalOcean Container Registry
+#       run: doctl registry login --expiry-seconds 1200
+
+#     - name: Build Docker image
+#       run: |
+#         docker build -f Dockerfile.prod -t $REGISTRY/$IMAGE_NAME:latest .
+#         docker build -f Dockerfile.prod -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
+
+#     - name: Check image size
+#       run: |
+#         echo "📊 Image size information:"
+#         docker images $REGISTRY/$IMAGE_NAME:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+#         # Fail if image is too large (>400MB to leave buffer)
+#         IMAGE_SIZE=$(docker images $REGISTRY/$IMAGE_NAME:latest --format "{{.Size}}" | sed 's/[^0-9.]//g')
+#         echo "Image size: ${IMAGE_SIZE}MB"
+
+#     - name: Push Docker image to DigitalOcean Container Registry
+#       run: |
+#         docker push $REGISTRY/$IMAGE_NAME:latest
+#         docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
+
+#   deploy:
+#     needs: build-and-push
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
+
+#     steps:
+#     - name: Deploy to DigitalOcean Droplet
+#       uses: appleboy/ssh-action@v1.0.3
+#       with:
+#         host: ${{ secrets.DROPLET_IP }}
+#         username: ${{ secrets.DROPLET_USERNAME }}
+#         key: ${{ secrets.DROPLET_SSH_KEY }}
+#         script: |
+#           # Login to DigitalOcean Container Registry
+#           echo ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} | docker login registry.digitalocean.com -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} --password-stdin
+
+#           # Stop existing container
+#           docker stop nodejs-app || true
+#           docker rm nodejs-app || true
+
+#           # Pull latest image
+#           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+#           # Run new container
+#           docker run -d \
+#             --name nodejs-app \
+#             -p 3000:3000 \
+#             --env-file /home/${{ secrets.DROPLET_USERNAME }}/.env \
+#             --restart unless-stopped \
+#             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+#           # Clean up old images
+#           docker image prune -f
