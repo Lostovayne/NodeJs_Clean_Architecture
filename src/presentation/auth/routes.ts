@@ -1,4 +1,4 @@
-import { AuthDataSourceImpl } from "@src/infrastructure/data/auth.datasource.impl";
+import { AuthDataSourceImpl } from "@src/infrastructure/datasource/auth.datasource.impl";
 import { AuthRepositoryImpl } from "@src/infrastructure/repositories/auth.repository.impl";
 import { Router } from "express";
 import { AuthController } from "./controller";

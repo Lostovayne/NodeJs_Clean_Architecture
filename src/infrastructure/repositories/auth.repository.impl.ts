@@ -1,4 +1,4 @@
-import type { AuthDataSource } from "@src/domain/data/auth.datasource";
+import type { AuthDataSource } from "@src/domain/datasource/auth.datasource";
 import type { RegisterUserDto } from "@src/domain/dtos/auth/register-user.dto";
 import type { UserEntity } from "@src/domain/entities/user.entity";
 import type { AuthRepository } from "@src/domain/repositories/auth.repository";

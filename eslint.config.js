@@ -11,7 +11,7 @@ export default [
       "@typescript-eslint": tsPlugin,
     },
     rules: {
-      "no-unused-vars": "warn",
+      // "no-unused-vars": "warn",
       // "no-undef": "warn",
       // Agrega aquí solo las reglas que realmente quieras personalizar
     },
