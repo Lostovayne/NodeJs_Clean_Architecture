@@ -5,7 +5,9 @@
   "scripts": {
     "build": "bun build index.ts --outdir dist --target node",
     "dev": "bun --watch index.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "private": true,
   "devDependencies": {
