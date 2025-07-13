@@ -41,7 +41,7 @@ export class AuthController {
 
   getUsers = (req: Request, res: Response): void => {
     UserModel.find()
-      .then((users) => res.json({ users, payload: req.body.payload }))
+      .then((users) => res.json({ users, user: req.body.user }))
       .catch((error) => this.handleError(error, res));
   };
 }
