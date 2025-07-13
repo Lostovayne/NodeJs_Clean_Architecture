@@ -1,3 +1,5 @@
+import { JwtAdapter } from "@src/config/jwt";
+import { UserModel } from "@src/data/mongodb/models/user.mode";
 import { RegisterUserDto } from "@src/domain/dtos/auth/register-user.dto";
 import { CustomError } from "@src/domain/errors/custom.error";
 import type { AuthRepository } from "@src/domain/repositories/auth.repository";
@@ -27,11 +29,19 @@ export class AuthController {
 
     this.authRepository
       .register(registerUserDto)
-      .then((user) => res.json(user))
+      .then(async (user) =>
+        res.json({ user, token: await JwtAdapter.generateToken({ id: user.id }) })
+      )
       .catch((error) => this.handleError(error, res));
   };
 
   loginUser = (req: Request, res: Response): void => {
     res.json("User logged in successfully");
+  };
+
+  getUsers = (req: Request, res: Response): void => {
+    UserModel.find()
+      .then((users) => res.json(users))
+      .catch((error) => this.handleError(error, res));
   };
 }
