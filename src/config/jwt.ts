@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { envs } from "./envs";
 
-type Duration = "2h" | "1d" | "7d" | "30d";
+export type Duration = "2h" | "1d" | "7d" | "30d";
 
 export class JwtAdapter {
   static async generateToken(payload: Object, duration: Duration = "2h"): Promise<string | null> {
